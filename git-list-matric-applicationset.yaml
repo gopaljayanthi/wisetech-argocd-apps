@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: main-applicationset
+spec:
+  generators:
+    - matrix:
+        generators:
+          - git:
+              repoURL: 'https://github.com/your-repo/your-app-configs.git'
+              revision: main
+              files:
+              - path: "workloads/**/{{ $val.environment }}/config.json"
+          - list:
+              elements:
+                - name: dev
+                  environment: dev
+                - name: qa
+                  environment: qa
+                - name: perf
+                  environment: perf
+                - name: uat
+                  environment: uat
+                - name: prod
+                  environment: prod
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/instance: '{{name}}-{{environment}}'
+    spec:
+      project: default
+      source:
+        repoURL: 'https://github.com/your-repo/your-app-configs.git'
+        targetRevision: main
+        path: 'path/to/your/apps/{{name}}'
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: '{{environment}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true

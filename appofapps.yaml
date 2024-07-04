@@ -12,7 +12,11 @@ spec:
     path: appofapps
     repoURL: https://github.com/gopaljayanthi/wisetech-argocd-apps.git
     targetRevision: master
+    directory:
+      recurse: true
   syncPolicy:
-    automated: {}
+    automated:
+      prune: true
+      selfHeal: true
     syncOptions:
     - CreateNamespace=true
