@@ -1,0 +1,27 @@
+---
+# Source: argocd-projects/templates/argocd-project.tmpl
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  labels:
+    app.kubernetes.io/instance: chartofapps
+  name: dev-project
+  namespace: argocd
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - name: in-*
+    namespace: dev
+    server: '*'
+  sourceRepos:
+  - '*'
+  syncWindows:
+  - applications:
+    - '*'
+    duration: 24h
+    kind: allow
+    manualSync: true
+    schedule: '* 11 * * *'
+    timeZone: UTC

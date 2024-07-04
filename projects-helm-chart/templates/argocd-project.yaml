@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  labels:
+    app.kubernetes.io/instance: chartofapps
+  name: {{ .Values.env }}-project
+  namespace: argocd
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - name: {{ .Values.env }}-*
+    namespace: {{ .Values.env }}
+    server: '*'
+  sourceRepos:
+  - '*'
+  syncWindows:
+  - applications:
+    - '*'
+    duration: {{ .Values.syncWindowDuration }}
+    kind: allow
+    manualSync: true
+    schedule: '* 11 * * *'
+    timeZone: UTC

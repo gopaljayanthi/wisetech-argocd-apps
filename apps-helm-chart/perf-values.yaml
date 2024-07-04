@@ -1,0 +1,3 @@
+environment: perf
+namespace: perf
+cluster: qa-perf-cluster

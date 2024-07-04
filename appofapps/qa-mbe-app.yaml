@@ -1,0 +1,23 @@
+---
+# Source: mbe/templates/mbe-app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: qa-mbe
+  namespace: argocd
+spec:
+  destination:
+    namespace: qa
+    name: qa-perf-cluster
+  project: qa-project
+  source:
+    path: mbe/mainchart/qa
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+      - values.yaml
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
