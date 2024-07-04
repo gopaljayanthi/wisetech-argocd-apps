@@ -11,7 +11,7 @@ spec:
     name: in-cluster
   project: dev-project
   source:
-    path: mbe/mainchart/dev
+    path: mbe-mainchart/dev
     repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
     targetRevision: HEAD
     helm:

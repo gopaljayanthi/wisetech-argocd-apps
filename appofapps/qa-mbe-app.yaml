@@ -11,7 +11,7 @@ spec:
     name: qa-perf-cluster
   project: qa-project
   source:
-    path: mbe/mainchart/qa
+    path: mbe-mainchart/qa
     repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
     targetRevision: HEAD
     helm:

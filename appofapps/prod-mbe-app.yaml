@@ -11,7 +11,7 @@ spec:
     name: uat-prod-cluster
   project: prod-project
   source:
-    path: mbe/mainchart/prod
+    path: mbe-mainchart/prod
     repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
     targetRevision: HEAD
     helm:
