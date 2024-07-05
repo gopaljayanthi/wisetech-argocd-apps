@@ -1,0 +1,23 @@
+---
+# Source: apps-helm-chart/templates/app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: uat-demoapp
+  namespace: argocd
+spec:
+  destination:
+    namespace: uat
+    name: in-cluster
+  project: uat-project
+  source:
+    path: demoapp-mainchart/uat
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+      - values.yaml
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
