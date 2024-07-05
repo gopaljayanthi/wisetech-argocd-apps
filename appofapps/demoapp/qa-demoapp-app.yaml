@@ -8,7 +8,7 @@ metadata:
 spec:
   destination:
     namespace: qa
-    name: qa-perf-cluster
+    name: in-cluster
   project: qa-project
   source:
     path: demoapp-mainchart/qa
