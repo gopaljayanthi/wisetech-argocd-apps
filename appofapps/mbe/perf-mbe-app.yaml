@@ -1,0 +1,23 @@
+---
+# Source: apps-helm-chart/templates/app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: perf-mbe
+  namespace: argocd
+spec:
+  destination:
+    namespace: perf
+    name: qa-perf-cluster
+  project: perf-project
+  source:
+    path: mbe-mainchart/perf
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+      - values.yaml
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
