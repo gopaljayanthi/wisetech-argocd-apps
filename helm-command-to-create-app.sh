@@ -1,32 +1,54 @@
 #!/bin/bash
-# Check if a folder argument is provided
-if [ -z "$2" ]; then
-  echo "Usage: $0 <appname> <environment>"
-  exit 1
-fi
 
+# Define the allowed list of environments
+allowed_environments=("dev" "qa" "prod" "perf" "uat")
 
-# Check if the second argument is provided
+# Function to check if an environment is allowed
+function is_env_allowed {
+    local env=$1
+    for allowed_env in "${allowed_environments[@]}"; do
+        if [[ "$env" == "$allowed_env" ]]; then
+            return 0  # Environment is allowed
+        fi
+    done
+    return 1  # Environment is not allowed
+}
+
+# Check if a appname and env arguments are provided
 if [ -z "$2" ]; then
-  echo "Error: No environment provided."
+  echo "Usage: $0 <appname> <environment(s, comma sepearated list)>
+ allowed_environments=("dev" "qa" "prod" "perf" "uat")
+ examples
+  $0 myapp dev
+  $0 anotherapp dev,qa
+  $0 someotherapp perf,prod,uat
+  Avoid SPACES in all arguments"
   exit 1
 fi
-# List of valid environments
-valid_environments=("dev" "qa" "per" "uat" "prod")
-# Check if the second argument is in the list of valid environments
-if [[ ! " ${valid_environments[@]} " =~ " $2 " ]]; then
-  echo "Error: Invalid environment '$2'. Valid environments are: ${valid_environments[*]}."
-  exit 1
-fi
-echo "Environment '$2' is valid."
 
 # Assign the first argument to a variable
 appname="$1"
-env="$2"
+env_list="$2"
 
-#helm template apps-helm-chart
-mkdir -p appofapps/"$appname"/
-helm template apps-helm-chart -f apps-helm-chart/values.yaml -f apps-helm-chart/"$env"-values.yaml --set appname="$appname" > appofapps/"$appname"/"$env"-"$appname"-app.yaml
+  # Create directories if needed
+  mkdir -p appofapps/"$appname"/
 
-echo app yaml created at appofapps/"$appname"/"$env"-"$appname"-app.yaml
-cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
+# Split the comma-separated list into an array
+IFS=',' read -r -a env_array <<< "$env_list"
+
+# Loop over each environment value
+for env in "${env_array[@]}"; do
+  # Check if the environment is allowed
+  if ! is_env_allowed "$env"; then
+    echo "Error: Environment '$env' is not allowed."
+    echo 'allowed_environments=("dev" "qa" "prod" "perf" "uat")'
+    continue  # Skip processing this environment
+  fi
+   echo
+    echo "Environment '$env'"
+  # Generate YAML using Helm template
+  helm template apps-helm-chart -f apps-helm-chart/values.yaml -f apps-helm-chart/"$env"-values.yaml --set appname="$appname" > appofapps/"$appname"/"$env"-"$appname"-app.yaml
+
+  echo "App YAML created at appofapps/$appname/$env-$appname-app.yaml"
+  #cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
+done
