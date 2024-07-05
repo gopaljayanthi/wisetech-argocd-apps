@@ -1,0 +1,23 @@
+---
+# Source: apps-helm-chart/templates/app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-demoapp
+  namespace: argocd
+spec:
+  destination:
+    namespace: dev
+    name: in-cluster
+  project: dev-project
+  source:
+    path: demoapp-mainchart/dev
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+      - values.yaml
+  syncPolicy:
+    automated: {}
+    syncOptions:
+    - CreateNamespace=true
