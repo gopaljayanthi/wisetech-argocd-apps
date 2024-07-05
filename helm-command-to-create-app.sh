@@ -52,3 +52,6 @@ for env in "${env_array[@]}"; do
   echo "App YAML created at appofapps/$appname/$env-$appname-app.yaml"
   #cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
 done
+
+echo Checking if the app is ready to be added to git
+./check-app-repo-path-branch.sh appofapps/$appname/$env-$appname-app.yaml
