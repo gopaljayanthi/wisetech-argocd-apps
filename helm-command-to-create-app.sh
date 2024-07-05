@@ -5,6 +5,21 @@ if [ -z "$2" ]; then
   exit 1
 fi
 
+
+# Check if the second argument is provided
+if [ -z "$2" ]; then
+  echo "Error: No environment provided."
+  exit 1
+fi
+# List of valid environments
+valid_environments=("dev" "qa" "per" "uat" "prod")
+# Check if the second argument is in the list of valid environments
+if [[ ! " ${valid_environments[@]} " =~ " $2 " ]]; then
+  echo "Error: Invalid environment '$2'. Valid environments are: ${valid_environments[*]}."
+  exit 1
+fi
+echo "Environment '$2' is valid."
+
 # Assign the first argument to a variable
 appname="$1"
 env="$2"
