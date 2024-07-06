@@ -1,0 +1,113 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.environment }}-{{ .Values.metadata.name }}
+  namespace: {{ .Values.metadata.namespace }}
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    name: {{ .Values.metadata.labels.name }}
+spec:
+  project: {{ .Values.spec.project }}
+
+  source:
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+    path: {{ .Values.spec.source.path }}
+
+    #chart: {{ .Values.spec.source.chart }}
+    helm:
+      passCredentials: {{ .Values.spec.source.helm.passCredentials }}
+      parameters:
+        {{- range .Values.spec.source.helm.parameters }}
+        - name: "{{ .name }}"
+          value: "{{ .value }}"
+        {{- end }}
+
+      fileParameters:
+        {{- range .Values.spec.source.helm.fileParameters }}
+        - name: {{ .name }}
+          path: {{ .path }}
+        {{- end }}
+
+      releaseName: {{ .Values.spec.source.helm.releaseName }}
+
+      valueFiles:
+        {{- range .Values.spec.source.helm.valueFiles }}
+        - {{ . }}
+        {{- end }}
+
+      ignoreMissingValueFiles: {{ .Values.spec.source.helm.ignoreMissingValueFiles }}
+
+      values: |
+{{ .Values.spec.source.helm.values | toYaml | indent 8 }}
+
+      valuesObject: |
+{{ .Values.spec.source.helm.valuesObject | toYaml | indent 8 }}
+
+      skipCrds: {{ .Values.spec.source.helm.skipCrds }}
+
+      version: {{ .Values.spec.source.helm.version }}
+
+  sources:
+    {{- range .Values.spec.sources }}
+    - repoURL: {{ .repoURL }}
+      targetRevision: {{ .targetRevision }}
+      path: {{ .path }}
+      ref: {{ .ref }}
+    {{- end }}
+
+  destination:
+    server: {{ .Values.spec.destination.server }}
+    namespace: {{ .Values.spec.destination.namespace }}
+
+  info:
+    {{- range .Values.spec.info }}
+    - name: '{{ .name }}'
+      value: '{{ .value }}'
+    {{- end }}
+
+  syncPolicy:
+    automated:
+      prune: {{ .Values.spec.syncPolicy.automated.prune }}
+      selfHeal: {{ .Values.spec.syncPolicy.automated.selfHeal }}
+      allowEmpty: {{ .Values.spec.syncPolicy.automated.allowEmpty }}
+    syncOptions:
+      {{- range .Values.spec.syncPolicy.syncOptions }}
+      - {{ . }}
+      {{- end }}
+
+    retry:
+      limit: {{ .Values.spec.syncPolicy.retry.limit }}
+      backoff:
+        duration: {{ .Values.spec.syncPolicy.retry.backoff.duration }}
+        factor: {{ .Values.spec.syncPolicy.retry.backoff.factor }}
+        maxDuration: {{ .Values.spec.syncPolicy.retry.backoff.maxDuration }}
+
+  ignoreDifferences:
+    {{- range .Values.spec.ignoreDifferences }}
+    - group: {{ .group }}
+      kind: {{ .kind }}
+      {{- if .jsonPointers }}
+      jsonPointers:
+        {{- range .jsonPointers }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- if .jqPathExpressions }}
+      jqPathExpressions:
+        {{- range .jqPathExpressions }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+      {{- if .managedFieldsManagers }}
+      managedFieldsManagers:
+        {{- range .managedFieldsManagers }}
+        - {{ . }}
+        {{- end }}
+      {{- end }}
+      name: {{ .name }}
+      namespace: {{ .namespace }}
+    {{- end }}
+
+  revisionHistoryLimit: {{ .Values.spec.revisionHistoryLimit }}

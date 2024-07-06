@@ -1,0 +1,52 @@
+environment: dev
+metadata:
+  name: guestbook
+  namespace: argocd
+  labels:
+    name: guestbook
+
+spec:
+  syncPolicy:
+    retry:
+      limit: 1
+      backoff:
+        duration: 5m
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  project: default
+  source:
+    repoURL: https://github.com/argoproj/argocd-example-apps.git
+    targetRevision: HEAD
+    path: guestbook
+    #chart: chart-name
+    helm:
+      passCredentials: false
+      parameters: []
+        #- name: "benda"
+        #  value: mydomain.example.com
+        #- name: "ingress"
+        #  value: "true"
+        #  forceString: true
+      fileParameters: []
+        #- name: config
+         # path: files/config.json
+      releaseName: guestbook
+      valueFiles:
+        - values.yaml
+      ignoreMissingValueFiles: false
+      values: []
+      valuesObject: []
+      skipCrds: false
+      version: v2
+    kustomize: {}
+    directory:
+      recurse: true
+      exclude: {}
+      include: '*.yaml'
+    plugin: {}
