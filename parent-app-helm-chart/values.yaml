@@ -2,5 +2,5 @@
 appname: mbe
 spec:
   source:
-    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    repoURL: https://github.com/gopaljayanthi/wisetech-argocd-apps
     targetRevision: master
