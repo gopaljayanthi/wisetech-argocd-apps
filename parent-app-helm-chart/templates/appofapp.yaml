@@ -1,0 +1,23 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ .Values.environment }}-parent-{{ .Values.appname }}
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    name: in-cluster
+  project: default
+  source:
+    path: apps-helm-chart/
+    repoURL: {{ .Values.spec.source.repoURL }}
+    targetRevision: {{ .Values.spec.source.targetRevision }}
+    helm:
+      valueFiles:
+      - values.yaml
+      - {{ .Values.environment }}-values.yaml
+      - {{ .Values.appname }}/{{ .Values.appname }}-values.yaml
+      - {{ .Values.appname }}/{{ .Values.environment }}-{{ .Values.appname }}-values.yaml
+  syncPolicy:
+    automated:
+      prune: true

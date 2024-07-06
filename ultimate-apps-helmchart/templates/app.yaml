@@ -3,6 +3,10 @@ kind: Application
 metadata:
   name: {{ .Values.environment }}-{{ .Values.metadata.name }}
   namespace: {{ .Values.metadata.namespace }}
+  annotations: 
+    {{- range $key, $value := .Values.metadata.annotations }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
   finalizers:
     - resources-finalizer.argocd.argoproj.io
   labels:

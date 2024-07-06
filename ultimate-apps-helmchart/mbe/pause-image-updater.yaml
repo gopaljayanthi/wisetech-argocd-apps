@@ -1,0 +1,3 @@
+metadata:
+  annotations:
+    argocd-image-updater.argoproj.io/app.ignore-tags: "*"

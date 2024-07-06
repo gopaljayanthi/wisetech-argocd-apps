@@ -1,0 +1,25 @@
+---
+# Source: apps-helm-chart/templates/appofapp.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-parent-mbe
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    name: in-cluster
+  project: default
+  source:
+    path: apps-helm-chart/
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: master
+    helm:
+      valueFiles:
+      - values.yaml
+      - dev-values.yaml
+      - mbe/mbe-values.yaml
+      - mbe/dev-mbe-values.yaml
+  syncPolicy:
+    automated:
+      prune: true

@@ -1,0 +1,6 @@
+#environment: dev
+appname: mbe
+spec:
+  source:
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: master
