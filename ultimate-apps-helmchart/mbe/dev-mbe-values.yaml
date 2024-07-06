@@ -1,20 +1,6 @@
 metadata:
   annotations:
-    argocd-image-updater.argoproj.io/app.helm.image-name: docker.io/gopalvithaljayanthi/nginx
-    argocd-image-updater.argoproj.io/app.ignore-tags: somethingorother
-    argocd-image-updater.argoproj.io/app.helm.image-tag: mybranch-1275
-    argocd-image-updater.argoproj.io/es-sync.helm.image-name: docker.io/gopalvithaljayanthi/nginx
-    argocd-image-updater.argoproj.io/es-sync.ignore-tags: somethingorother
-    argocd-image-updater.argoproj.io/es-sync.helm.image-tag: mybranch-1275
-    argocd-image-updater.argoproj.io/external.update-strategy: latest
-    argocd-image-updater.argoproj.io/external.helm.image-name: docker.io/gopalvithaljayanthi/nginx
-    argocd-image-updater.argoproj.io/external.ignore-tags: somethingorother
-    argocd-image-updater.argoproj.io/external.helm.image-tag: mybranch-1275
-    argocd-image-updater.argoproj.io/micro-ui.update-strategy: latest
-    argocd-image-updater.argoproj.io/micro-ui.helm.image-name: docker.io/gopalvithaljayanthi/nginx
-    argocd-image-updater.argoproj.io/micro-ui.ignore-tags: somethingorother
-    argocd-image-updater.argoproj.io/micro-ui.helm.image-tag: mybranch-1275
-    argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^{{ .Values.branch }}
-    argocd-image-updater.argoproj.io/external.allow-tags: regexp:^{{ .Values.branch }}
-    argocd-image-updater.argoproj.io/micro-ui.allow-tags: regexp:^{{ .Values.branch }}
-    argocd-image-updater.argoproj.io/app.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/external.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/micro-ui.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/app.allow-tags: regexp:^mybranch

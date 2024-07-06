@@ -1,3 +1,6 @@
 metadata:
   annotations:
     argocd-image-updater.argoproj.io/app.ignore-tags: somethingorother
+    argocd-image-updater.argoproj.io/es-sync.ignore-tags: somethingorother
+    argocd-image-updater.argoproj.io/external.ignore-tags: somethingorother
+    argocd-image-updater.argoproj.io/micro-ui.ignore-tags: somethingorother
