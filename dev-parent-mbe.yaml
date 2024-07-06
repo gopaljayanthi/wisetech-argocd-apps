@@ -12,7 +12,7 @@ spec:
   project: default
   source:
     path: apps-helm-chart/
-    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    repoURL: https://github.com/gopaljayanthi/wisetech-argocd-apps
     targetRevision: master
     helm:
       valueFiles:
