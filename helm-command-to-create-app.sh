@@ -96,6 +96,11 @@ done
 echo Checking if the app is ready to be added to git
 ./check-app-repo-path-branch.sh apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml || exit 1
 
+echo checking dry-run of kubectl apply
+k apply -f apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml --dry-run=client
+
+echo please run argocd app create selfdeployingapp --file apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+
 echo "run 
 git status "
 echo
@@ -110,6 +115,8 @@ echo " git add commit push "
 echo if application is not healthy and/or sync failed
 echo please edit apps-helm-chart/"$appname"/"$appname"-values.yaml
 echo or apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml
+
+
 
 
 
