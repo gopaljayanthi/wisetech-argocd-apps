@@ -1,0 +1,3 @@
+environment: qa
+namespace: qa
+cluster: in-cluster
