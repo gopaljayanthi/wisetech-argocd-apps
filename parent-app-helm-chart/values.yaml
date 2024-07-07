@@ -1,4 +1,4 @@
-#environment: dev
+environment: all
 appname: mbe
 spec:
   source:
