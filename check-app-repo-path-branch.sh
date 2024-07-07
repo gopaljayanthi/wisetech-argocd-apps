@@ -70,7 +70,8 @@ fi
 # Usage example
 if folder_exists_in_repo "$repoURL" "$branch" "$path"; then
     echo "Folder exists!"
-        echo you can create this application now, by git add/commit/push
+        echo "you can create this application now,
+ by git add/commit/push"
 else
     echo "Folder does not exist."
     echo do not create this application yet

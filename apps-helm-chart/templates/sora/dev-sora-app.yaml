@@ -3,7 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-benda
+  name: dev-sora
   namespace: argocd
   labels: 
      org: opsmx
@@ -13,15 +13,15 @@ spec:
     name: in-cluster
   project: dev-project
   source:
-    path: benda-mainchart/dev
+    path: sora-mainchart/dev
     repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
     targetRevision: HEAD
     helm:
       valueFiles:
       - values.yaml
       - dev-values.yaml
-      - benda/benda-values.yaml
-      - benda/dev-benda-values.yaml
+      - sora/sora-values.yaml
+      - sora/dev-sora-values.yaml
   syncPolicy:
     automated:
       prune: true
