@@ -72,7 +72,9 @@ if folder_exists_in_repo "$repoURL" "$branch" "$path"; then
     echo "Folder exists!"
         echo "you can create this application now,
  by git add/commit/push"
+ exit 0
 else
     echo "Folder does not exist."
     echo do not create this application yet
+    exit 1
 fi

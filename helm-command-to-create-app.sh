@@ -94,7 +94,7 @@ fi
 done
 
 echo Checking if the app is ready to be added to git
-./check-app-repo-path-branch.sh apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+./check-app-repo-path-branch.sh apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml || exit 1
 
 echo "run 
 git status "
@@ -103,14 +103,13 @@ echo verify apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
 echo
 echo if satisfied use kubectl apply to test the application
 echo "run
-kubectl apply -f  apps-helm-chart/templates/$appname"/$env-$appname-app.yaml"
+kubectl apply -f  apps-helm-chart/templates/$appname/$env-$appname-app.yaml "
 echo
 echo if application is healthy and synced
-echo "
-git add -A
-git commit -m "added application $appname in $env environment"
-git push
-"
+echo " git add commit push "
+echo if application is not healthy and/or sync failed
+echo please edit apps-helm-chart/"$appname"/"$appname"-values.yaml
+echo or apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml
 
 
 
