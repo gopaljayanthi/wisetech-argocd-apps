@@ -3,23 +3,23 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-mbe
+  name: uat-benda
   namespace: argocd
 spec:
   destination:
-    namespace: dev
+    namespace: uat
     name: in-cluster
-  project: dev-project
+  project: uat-project
   source:
-    path: mbe-mainchart/dev
+    path: benda-mainchart/uat
     repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
     targetRevision: HEAD
     helm:
       valueFiles:
       - values.yaml
-      - dev-values.yaml
-      - mbe/mbe-values.yaml
-      - mbe/dev-mbe-values.yaml
+      - uat-values.yaml
+      - benda/benda-values.yaml
+      - benda/uat-benda-values.yaml
   syncPolicy:
     automated:
       prune: true

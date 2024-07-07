@@ -48,7 +48,10 @@ for env in "${env_array[@]}"; do
     echo "Environment '$env'"
   # Generate YAML using Helm template
     mkdir -p apps-helm-chart/templates/"$appname"
- helm template apps-helm-chart -f apps-helm-chart/values.yaml -f apps-helm-chart/"$env"-values.yaml -f apps-helm-chart/"$appname"/"$appname"-values.yaml -f apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml > apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+    mkdir -p apps-helm-chart/"$appname"
+    cp apps-helm-chart/values.yaml apps-helm-chart/"$appname"/"$appname"-values.yaml
+    cp apps-helm-chart/"$env"-values.yaml apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml
+ helm template apps-helm-chart -f apps-helm-chart/values.yaml -f apps-helm-chart/"$env"-values.yaml -f apps-helm-chart/"$appname"/"$appname"-values.yaml -f apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml --set appname="$appname" --show-only  templates/app.yaml > apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
 
   echo "App YAML created at apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml "
   #cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
