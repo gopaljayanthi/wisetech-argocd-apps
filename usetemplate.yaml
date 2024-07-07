@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: use-template
+  namespace: argocd
+spec:
+  destination:
+    namespace: argocd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      valueFiles:
+      - values.yaml
+      - dev-values.yaml
+      - mbe/mbe-values.yaml
+      - mbe/dev-mbe-values.yaml
+    path: apps-helm-chart
+    repoURL: https://github.com/gopaljayanthi/wisetech-argocd-apps.git
+    targetRevision: master

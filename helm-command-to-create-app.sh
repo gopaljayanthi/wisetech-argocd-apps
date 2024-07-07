@@ -31,7 +31,7 @@ appname="$1"
 env_list="$2"
 
   # Create directories if needed
-  mkdir -p appofapps/"$appname"/
+  #mkdir -p appofapps/"$appname"/
 
 # Split the comma-separated list into an array
 IFS=',' read -r -a env_array <<< "$env_list"
@@ -47,11 +47,16 @@ for env in "${env_array[@]}"; do
    echo
     echo "Environment '$env'"
   # Generate YAML using Helm template
-  helm template apps-helm-chart -f apps-helm-chart/values.yaml -f apps-helm-chart/"$env"-values.yaml --set appname="$appname" > appofapps/"$appname"/"$env"-"$appname"-app.yaml
+    mkdir -p apps-helm-chart/templates/"$appname"
+ helm template apps-helm-chart -f apps-helm-chart/values.yaml -f apps-helm-chart/"$env"-values.yaml -f apps-helm-chart/"$appname"/"$appname"-values.yaml -f apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml > apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
 
-  echo "App YAML created at appofapps/$appname/$env-$appname-app.yaml"
+  echo "App YAML created at apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml "
   #cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
 done
 
-echo Checking if the app is ready to be added to git
-./check-app-repo-path-branch.sh appofapps/$appname/$env-$appname-app.yaml
+#echo Checking if the app is ready to be added to git
+#./check-app-repo-path-branch.sh apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+
+echo run git status verify apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+
+
