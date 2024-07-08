@@ -1,0 +1,30 @@
+---
+# Source: apps-helm-chart/templates/app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-yuga
+  namespace: argocd
+  labels: 
+     org: opsmx
+spec:
+  destination:
+    namespace: giri-dev
+    name: in-cluster
+  project: dev-project
+  source:
+    path: yuga-mainchart/dev
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+      - values.yaml
+      #- dev-values.yaml
+      #- yuga/yuga-values.yaml
+      #- yuga/dev-yuga-values.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions: 
+    - CreateNamespace=true
