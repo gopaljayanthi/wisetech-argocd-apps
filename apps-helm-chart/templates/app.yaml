@@ -17,9 +17,9 @@ spec:
     helm:
       valueFiles:
       - values.yaml
-      - {{ .Values.environment }}-values.yaml
-      - {{ .Values.appname }}/{{ .Values.appname }}-values.yaml
-      - {{ .Values.appname }}/{{ .Values.environment }}-{{ .Values.appname }}-values.yaml
+      #- {{ .Values.environment }}-values.yaml
+      #- {{ .Values.appname }}/{{ .Values.appname }}-values.yaml
+      #- {{ .Values.appname }}/{{ .Values.environment }}-{{ .Values.appname }}-values.yaml
   syncPolicy:
     automated:
       prune: true
