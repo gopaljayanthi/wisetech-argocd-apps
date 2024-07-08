@@ -1,6 +1,6 @@
 apiVersion: v2
 name: apps-helm-chart
-description: A Helm chart for Kubernetes
+description: AppEngine , creates all applications for this argocd
 type: application
 version: 0.1.0
 appVersion: "0.1.0"

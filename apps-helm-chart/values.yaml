@@ -1,2 +1,11 @@
+appname: APPNAME
 org: opsmx
-gitrepo: https://github.com/gopaljayanthi/wisetech-k8s-repo 
+customname: -mainchart
+#environment: all
+environment: 
+
+#comment out these lines later
+#gitrepo: https://github.com/gopaljayanthi/wisetech-k8s-repo 
+gitrepo: https://github.com/gopaljayanthi/wisetech-argocd-apps
+namespace: argocd
+cluster: in-cluster

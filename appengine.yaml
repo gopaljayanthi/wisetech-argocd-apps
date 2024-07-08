@@ -1,3 +1,4 @@
+#DONT CHANGE OR DELETE
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -18,3 +19,6 @@ spec:
     path: apps-helm-chart
     repoURL: https://github.com/gopaljayanthi/wisetech-argocd-apps.git
     targetRevision: master
+  syncPolicy:
+    automated:
+      selfHeal: true
