@@ -13,7 +13,7 @@ spec:
     kind: '*'
   destinations:
   - name: in-*
-    namespace: dev
+    namespace: '*dev*'
     server: '*'
   sourceRepos:
   - '*'

@@ -60,7 +60,8 @@ echo
   echo mkdir apps-helm-chart/"$appname"
 echo
   echo please make sure that this folder contains apps-helm-chart/"$appname"/"$appname"-values.yaml and apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml
-  exit 1
+  #exit 1
+  mkdir -p apps-helm-chart/$appname
 else
   echo "The folder apps-helm-chart/$appname already exists."
 fi
@@ -69,7 +70,8 @@ fi
 if [ ! -f "apps-helm-chart/$appname/$appname"-values.yaml ]; then
   echo "The file apps-helm-chart/"$appname"/"$appname"-values.yaml does not exist."
   echo please create this file echo "appname: $appname" > apps-helm-chart/"$appname"/"$appname"-values.yaml , see other such files for examples.
-  exit 1
+  #exit 1
+  sed  "s/APPNAME/$appname/g" apps-helm-chart/example/values.yaml > apps-helm-chart/$appname/$appname-values.yaml
 else
   echo "The file apps-helm-chart/"$appname"/"$appname"-values.yaml exists."
 fi
@@ -77,7 +79,8 @@ fi
 if [ ! -f "apps-helm-chart/$appname/$env-$appname"-values.yaml ]; then
   echo "The file apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml does not exist."
   echo please create this file echo "appname: $appname" > apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml , see other such files for examples.
-    exit 1
+    #exit 1
+  sed  "s/APPNAME/$appname/g" apps-helm-chart/example/$env-values.yaml > apps-helm-chart/$appname/$env-$appname-values.yaml
 else
   echo "The file apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml-values.yaml exists."
 fi

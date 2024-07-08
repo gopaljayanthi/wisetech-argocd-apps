@@ -3,25 +3,25 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-yuga2
+  name: dev-testing
   namespace: argocd
   labels: 
      org: opsmx
 spec:
   destination:
-    namespace: dev-yuga2
+    namespace: dev
     name: in-cluster
   project: dev-project
   source:
-    path: yuga2-mainchart/dev
-    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    path: testing-mainchart/dev
+    repoURL: https://github.com/gopaljayanthi/wisetech-argocd-apps
     targetRevision: HEAD
     helm:
       valueFiles:
       - values.yaml
       #- dev-values.yaml
-      #- yuga2/yuga2-values.yaml
-      #- yuga2/dev-yuga2-values.yaml
+      #- testing/testing-values.yaml
+      #- testing/dev-testing-values.yaml
   syncPolicy:
     automated:
       prune: true

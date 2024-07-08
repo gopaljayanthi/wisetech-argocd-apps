@@ -1,0 +1,3 @@
+environment: qa
+namespace: qa-yuga2
+cluster: in-cluster

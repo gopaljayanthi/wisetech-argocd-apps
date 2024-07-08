@@ -13,7 +13,7 @@ spec:
     kind: '*'
   destinations:
   - name: '*perf*'
-    namespace: perf
+    namespace: '*perf*'
     server: '*'
   sourceRepos:
   - '*'

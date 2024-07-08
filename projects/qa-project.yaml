@@ -13,7 +13,7 @@ spec:
     kind: '*'
   destinations:
   - name: '*qa*'
-    namespace: qa
+    namespace: '*qa*'
     server: '*'
   sourceRepos:
   - '*'
