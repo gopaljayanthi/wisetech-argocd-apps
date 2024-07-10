@@ -1,3 +1,16 @@
 environment: dev
 namespace: dev
 cluster: in-cluster
+branch: mybranch
+metadata:
+  annotations:
+    argocd-image-updater.argoproj.io/app.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/external.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/micro-ui.allow-tags: regexp:^mybranch
+metadata:
+  annotations:
+    argocd-image-updater.argoproj.io/app.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/external.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/micro-ui.allow-tags: regexp:^mybranch

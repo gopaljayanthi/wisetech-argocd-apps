@@ -1,0 +1,56 @@
+---
+# Source: apps-helm-chart/templates/app.yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: dev-mbe
+  namespace: argocd
+  annotations:
+    argocd-image-updater.argoproj.io/app.allow-tags: "regexp:^mybranch"
+    argocd-image-updater.argoproj.io/app.helm.image-name: "app.image.name"
+    argocd-image-updater.argoproj.io/app.helm.image-tag: "app.image.tag"
+    argocd-image-updater.argoproj.io/app.ignore-tags: "*"
+    argocd-image-updater.argoproj.io/app.update-strategy: "latest"
+    argocd-image-updater.argoproj.io/es-sync.allow-tags: "regexp:^mybranch"
+    argocd-image-updater.argoproj.io/es-sync.helm.image-name: "es-sync.image.name"
+    argocd-image-updater.argoproj.io/es-sync.helm.image-tag: "es-sync.image.tag"
+    argocd-image-updater.argoproj.io/es-sync.ignore-tags: "*"
+    argocd-image-updater.argoproj.io/es-sync.update-strategy: "latest"
+    argocd-image-updater.argoproj.io/external.allow-tags: "regexp:^mybranch"
+    argocd-image-updater.argoproj.io/external.helm.image-name: "external.image.name"
+    argocd-image-updater.argoproj.io/external.helm.image-tag: "external.image.tag"
+    argocd-image-updater.argoproj.io/external.ignore-tags: "*"
+    argocd-image-updater.argoproj.io/external.update-strategy: "latest"
+    argocd-image-updater.argoproj.io/git-branch: "master"
+    argocd-image-updater.argoproj.io/image-list: "argocd-image-updater.argoproj.io/image-list: app=docker.io/gopalvithaljayanthi/nginx,es-sync=docker.io/gopalvithaljayanthi/nginx,external=docker.io/gopalvithaljayanthi/nginx,micro-ui=docker.io/gopalvithaljayanthi/nginx"
+    argocd-image-updater.argoproj.io/micro-ui.allow-tags: "regexp:^mybranch"
+    argocd-image-updater.argoproj.io/micro-ui.helm.image-name: "micro-ui.image.name"
+    argocd-image-updater.argoproj.io/micro-ui.helm.image-tag: "micro-ui.image.tag"
+    argocd-image-updater.argoproj.io/micro-ui.ignore-tags: "*"
+    argocd-image-updater.argoproj.io/micro-ui.update-strategy: "latest"
+    argocd-image-updater.argoproj.io/write-back-method: "git:secret:argocd/git-creds"
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels: 
+     org: opsmx
+spec:
+  destination:
+    namespace: dev
+    name: in-cluster
+  project: dev-project
+  source:
+    path: mbe-mainchart/dev
+    repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
+    targetRevision: HEAD
+    helm:
+      valueFiles:
+      - values.yaml
+      #- dev-values.yaml
+      #- mbe/mbe-values.yaml
+      #- mbe/dev-mbe-values.yaml
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions: 
+    - CreateNamespace=true

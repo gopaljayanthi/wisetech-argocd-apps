@@ -1,0 +1,26 @@
+metadata:
+  annotations:
+    argocd-image-updater.argoproj.io/image-list: 'argocd-image-updater.argoproj.io/image-list: app=docker.io/gopalvithaljayanthi/nginx,es-sync=docker.io/gopalvithaljayanthi/nginx,external=docker.io/gopalvithaljayanthi/nginx,micro-ui=docker.io/gopalvithaljayanthi/nginx'
+    argocd-image-updater.argoproj.io/app.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/app.update-strategy: latest
+    argocd-image-updater.argoproj.io/app.helm.image-name: app.image.name
+    argocd-image-updater.argoproj.io/app.ignore-tags: somethingorother
+    argocd-image-updater.argoproj.io/app.helm.image-tag: app.image.tag
+    argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/es-sync.update-strategy: latest
+    argocd-image-updater.argoproj.io/es-sync.helm.image-name: es-sync.image.name
+    argocd-image-updater.argoproj.io/es-sync.ignore-tags: somethingorother
+    argocd-image-updater.argoproj.io/es-sync.helm.image-tag: es-sync.image.tag
+    argocd-image-updater.argoproj.io/external.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/external.update-strategy: latest
+    argocd-image-updater.argoproj.io/external.helm.image-name: external.image.name
+    argocd-image-updater.argoproj.io/external.ignore-tags: somethingorother
+    argocd-image-updater.argoproj.io/external.helm.image-tag: external.image.tag
+    argocd-image-updater.argoproj.io/micro-ui.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/micro-ui.update-strategy: latest
+    argocd-image-updater.argoproj.io/micro-ui.helm.image-name: micro-ui.image.name
+    argocd-image-updater.argoproj.io/micro-ui.ignore-tags: somethingorother
+    argocd-image-updater.argoproj.io/micro-ui.helm.image-tag: micro-ui.image.tag
+    argocd-image-updater.argoproj.io/write-back-method: git:secret:argocd/git-creds
+    argocd-image-updater.argoproj.io/git-branch: master
+    notifications.argoproj.io/subscribe.on-deployed.github: mainchart-qa-on-deployed

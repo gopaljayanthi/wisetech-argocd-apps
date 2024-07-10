@@ -14,24 +14,35 @@ function is_env_allowed {
     return 1  # Environment is not allowed
 }
 
-# Check if a appname and env arguments are provided
-if [ -z "$2" ]; then
-  echo "Usage: $0 <appname> <environment(s, comma separated list)>
- allowed_environments=("dev" "qa" "prod" "perf" "uat")
- examples
-  $0 myapp dev
-  $0 anotherapp dev,qa
-  $0 someotherapp perf,prod,uat
-  Avoid SPACES in all arguments"
+# Check if the appname, env, and action arguments are provided
+if [ -z "$3" ]; then
+  echo "Usage: $0 <appname> <environment(s, comma separated list)> <action (pauseIU|resumeIU)>
+allowed_environments=("dev" "qa" "prod" "perf" "uat")
+examples:
+  $0 myapp dev pauseIU
+  $0 anotherapp dev,qa resumeIU
+  $0 someotherapp perf,prod,uat pauseIU
+Avoid SPACES in all arguments"
   exit 1
 fi
 
-# Assign the first argument to a variable
+# Assign the arguments to variables
 appname="$1"
 env_list="$2"
+action="$3"
 
-  # Create directories if needed
-  #mkdir -p appofapps/"$appname"/
+# Check if the action is either pauseIU or resumeIU
+if [[ "$action" != "pauseIU" && "$action" != "resumeIU" ]]; then
+  echo "Error: Action must be either 'pauseIU' or 'resumeIU'."
+  exit 1
+fi
+
+# Determine the appropriate file based on the action
+if [ "$action" == "pauseIU" ]; then
+  action_file="pause-image-updater.yaml"
+else
+  action_file="resume-image-updater.yaml"
+fi
 
 # Split the comma-separated list into an array
 IFS=',' read -r -a env_array <<< "$env_list"
@@ -44,53 +55,53 @@ for env in "${env_array[@]}"; do
     echo 'allowed_environments=("dev" "qa" "prod" "perf" "uat")'
     continue  # Skip processing this environment
   fi
-   echo
-    echo "Environment '$env'"
+
+  echo
+  echo "Environment '$env'"
+
   # Generate YAML using Helm template
-    mkdir -p apps-helm-chart/templates/"$appname"
-    #mkdir -p apps-helm-chart/"$appname"
-    #touch apps-helm-chart/"$appname"/"$appname"-values.yaml
-    #touch apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml
+  mkdir -p apps-helm-chart/templates/"$appname"
 
-if [ ! -d "apps-helm-chart/$appname" ]; then
-  echo "The folder apps-helm-chart/"$appname" does not exist."
-  # You can create the folder if it does not exist
-echo
-  echo please run 
-  echo mkdir apps-helm-chart/"$appname"
-echo
-  echo please make sure that this folder contains apps-helm-chart/"$appname"/"$appname"-values.yaml and apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml
-  #exit 1
-  mkdir -p apps-helm-chart/$appname
-else
-  echo "The folder apps-helm-chart/$appname already exists."
-fi
+  if [ ! -d "apps-helm-chart/$appname" ]; then
+    echo "The folder apps-helm-chart/$appname does not exist."
+    #echo "Please run:"
+    echo "creating apps-helm-chart/$appname"
+    #echo "Please make sure that this folder contains apps-helm-chart/$appname/$appname-values.yaml and apps-helm-chart/$appname/$env-$appname-values.yaml"
+    #mkdir -p apps-helm-chart/$appname
+  else
+    echo "The folder apps-helm-chart/$appname already exists."
+  fi
 
-# Check if the file does not exist
-if [ ! -f "apps-helm-chart/$appname/$appname"-values.yaml ]; then
-  echo "The file apps-helm-chart/"$appname"/"$appname"-values.yaml does not exist."
-  echo please create this file echo "appname: $appname" > apps-helm-chart/"$appname"/"$appname"-values.yaml , see other such files for examples.
-  #exit 1
-  sed  "s/APPNAME/$appname/g" apps-helm-chart/example/values.yaml > apps-helm-chart/$appname/$appname-values.yaml
-else
-  echo "The file apps-helm-chart/"$appname"/"$appname"-values.yaml exists."
-fi
+  if [ ! -f "apps-helm-chart/$appname/$appname-values.yaml" ]; then
+    echo "The file apps-helm-chart/$appname/$appname-values.yaml does not exist."
+    echo creating file apps-helm-chart/templates/mbe/dev-mbe-app.yaml
+    #echo "Please create this file:"
+    echo "appname: $appname" > apps-helm-chart/$appname/$appname-values.yaml
+    sed  "s/APPNAME/$appname/g" apps-helm-chart/example/values.yaml > apps-helm-chart/$appname/$appname-values.yaml
+  else
+    echo "The file apps-helm-chart/$appname/$appname-values.yaml exists."
+  fi
 
-if [ ! -f "apps-helm-chart/$appname/$env-$appname"-values.yaml ]; then
-  echo "The file apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml does not exist."
-  echo please create this file echo "appname: $appname" > apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml , see other such files for examples.
-    #exit 1
-  sed  "s/APPNAME/$appname/g" apps-helm-chart/example/$env-values.yaml > apps-helm-chart/$appname/$env-$appname-values.yaml
-else
-  echo "The file apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml-values.yaml exists."
-fi
+  if [ ! -f "apps-helm-chart/$appname/$env-$appname-values.yaml" ]; then
+    echo "The file apps-helm-chart/$appname/$env-$appname-values.yaml does not exist."
+    echo creating file apps-helm-chart/$appname/$env-$appname-values.yaml
+    #echo "Please create this file:"
+    echo "appname: $appname" > apps-helm-chart/$appname/$env-$appname-values.yaml
+    sed  "s/APPNAME/$appname/g" apps-helm-chart/example/$env-values.yaml > apps-helm-chart/$appname/$env-$appname-values.yaml
+  else
+    echo "The file apps-helm-chart/$appname/$env-$appname-values.yaml exists."
+  fi
+ 
+  ./create-annotations.sh $appname $dev
 
- helm template apps-helm-chart -f apps-helm-chart/values.yaml \
--f apps-helm-chart/"$env"-values.yaml \
--f apps-helm-chart/"$appname"/"$appname"-values.yaml \
--f apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml \
---set appname="$appname" \
---show-only  templates/app.yaml > apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+  helm template apps-helm-chart \
+    -f apps-helm-chart/values.yaml \
+    -f apps-helm-chart/"$env"-values.yaml \
+    -f apps-helm-chart/"$appname"/"$appname"-values.yaml \
+    -f apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml \
+    -f apps-helm-chart/"$appname"/"$action_file" \
+    --set appname="$appname" \
+    --show-only  templates/app.yaml > apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
 
   echo "App YAML created at apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml "
   #cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
@@ -102,25 +113,4 @@ echo Checking if the app is ready to be added to git
 echo checking dry-run of kubectl apply
 kubectl apply -f apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml --dry-run=client
 
-echo please run argocd app create selfdeployingapp --file apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
-
-echo "run 
-git status "
-echo
-echo verify apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
-echo
-echo if satisfied use kubectl apply to test the application
-echo "run
-kubectl apply -f  apps-helm-chart/templates/$appname/$env-$appname-app.yaml "
-echo
-echo if application is healthy and synced
-echo " git add commit push "
-echo if application is not healthy and/or sync failed
-echo please edit apps-helm-chart/"$appname"/"$appname"-values.yaml
-echo or apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml
-
-
-
-
-
-
+   

@@ -1,0 +1,6 @@
+metadata:
+  annotations:
+    argocd-image-updater.argoproj.io/app.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/external.allow-tags: regexp:^{{ .Values.branch }}
+    argocd-image-updater.argoproj.io/micro-ui.allow-tags: regexp:^{{ .Values.branch }}
