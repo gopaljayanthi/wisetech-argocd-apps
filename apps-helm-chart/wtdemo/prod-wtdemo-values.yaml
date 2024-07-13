@@ -1,0 +1,3 @@
+environment: prod
+namespace: prod-wtdemo
+cluster: prod-vcluster
