@@ -1,2 +1,4 @@
 appname: APPNAME
-gitrepo: https://github.com/gopaljayanthi/wisetech-k8s-repo 
+gitrepo: https://github.com/gopaljayanthi/wisetech-k8s-repo
+branch: mybranch
+

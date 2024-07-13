@@ -29,8 +29,8 @@ env="$2"
 
 mkdir -p apps-helm-chart/$appname
 
-../wisetech-k8s-repo/create-image-updater-annotation.sh ../wisetech-k8s-repo/$appname-mainchart/$env/values.yaml
-annotationFile=../wisetech-k8s-repo/$appname-mainchart/annotations.yaml
+../wisetech-k8s-repo/create-image-updater-annotation.sh ../wisetech-k8s-repo/$appname-mainchart/$env/values.yaml $appname
+annotationFile=./$appname-annotations.yaml
 appnameValuesFile=apps-helm-chart/$appname/$appname-values.yaml
 iuRegexpFile=apps-helm-chart/templates/$appname/image-updater-regexp.txt
 

@@ -67,7 +67,7 @@ for env in "${env_array[@]}"; do
     #echo "Please run:"
     echo "creating apps-helm-chart/$appname"
     #echo "Please make sure that this folder contains apps-helm-chart/$appname/$appname-values.yaml and apps-helm-chart/$appname/$env-$appname-values.yaml"
-    #mkdir -p apps-helm-chart/$appname
+    mkdir -p apps-helm-chart/$appname
   else
     echo "The folder apps-helm-chart/$appname already exists."
   fi
@@ -92,7 +92,7 @@ for env in "${env_array[@]}"; do
     echo "The file apps-helm-chart/$appname/$env-$appname-values.yaml exists."
   fi
  
-  ./create-annotations.sh $appname $dev
+  ./create-annotations.sh $appname dev
 
   helm template apps-helm-chart \
     -f apps-helm-chart/values.yaml \
@@ -113,4 +113,13 @@ echo Checking if the app is ready to be added to git
 echo checking dry-run of kubectl apply
 kubectl apply -f apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml --dry-run=client
 
+# Check if the previous command failed
+if [ $? -ne 0 ]; then
+    echo "The command kubectl apply -f command failed."
+    echo "Check the file apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml for issues"
+
+    exit 1
+fi
+
+echo run: kubectl apply -f apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
    
