@@ -60,7 +60,8 @@ for env in "${env_array[@]}"; do
   echo "Environment '$env'"
 
   # Generate YAML using Helm template
-  mkdir -p apps-helm-chart/templates/"$appname"
+  mkdir -p appofapps/"$appname"
+   mkdir -p apps-helm-chart/templates/"$appname"
 
   if [ ! -d "apps-helm-chart/$appname" ]; then
     echo "The folder apps-helm-chart/$appname does not exist."
@@ -94,6 +95,8 @@ for env in "${env_array[@]}"; do
  
   ./create-annotations.sh $appname dev
 
+  appFile=appofapps/"$appname"/"$env"-"$appname"-app.yaml
+
   helm template apps-helm-chart \
     -f apps-helm-chart/values.yaml \
     -f apps-helm-chart/"$env"-values.yaml \
@@ -101,28 +104,26 @@ for env in "${env_array[@]}"; do
     -f apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml \
     -f apps-helm-chart/"$appname"/"$action_file" \
     --set appname="$appname" \
-    --show-only  templates/app.yaml > apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+    --show-only  templates/app.yaml > $appFile
 
-  echo "App YAML created at apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml "
+  echo "App YAML created at $appFile "
   #cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
 done
 
 echo Checking if the app is ready to be added to git
-./check-app-repo-path-branch.sh apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml || exit 1
+./check-app-repo-path-branch.sh $appFile || exit 1
 
 echo checking dry-run of kubectl apply
-kubectl apply -f apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml --dry-run=client
+kubectl apply -f $appFile --dry-run=client
 
 # Check if the previous command failed
 if [ $? -ne 0 ]; then
     echo "The command kubectl apply -f command failed."
-    echo "Check the file apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml for issues"
+    echo "Check the file $appFile for issues"
 
     exit 1
 fi
 
-echo run: kubectl apply -f apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
-
-echo cleaning up
-rm -rf  
+echo run: kubectl apply -f $appFile
+  
    

@@ -31,6 +31,17 @@ mkdir -p apps-helm-chart/$appname
 
 ../wisetech-k8s-repo/create-image-updater-annotation.sh ../wisetech-k8s-repo/$appname-mainchart/$env/values.yaml $appname
 annotationFile=./$appname-annotations.yaml
+FILE_PATH="$annotationFile"
+
+# Check if the file does not exist
+if [ ! -f "$FILE_PATH" ]; then
+    echo "File '$FILE_PATH' not found."
+    exit 1
+fi
+
+# Continue with the script if the file exists
+echo "File '$FILE_PATH' exists."
+
 appnameValuesFile=apps-helm-chart/$appname/$appname-values.yaml
 iuRegexpFile=apps-helm-chart/templates/$appname/image-updater-regexp.txt
 
