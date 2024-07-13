@@ -122,4 +122,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo run: kubectl apply -f apps-helm-chart/templates/"$appname"/"$env"-"$appname"-app.yaml
+
+echo cleaning up
+rm -rf  
    
