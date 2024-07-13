@@ -27,7 +27,7 @@ fi
 appname="$1"
 env="$2"
 
-mkdir -p apps-helm-chart/$appname
+#mkdir -p apps-helm-chart/$appname
 
 ../wisetech-k8s-repo/create-image-updater-annotation.sh ../wisetech-k8s-repo/$appname-mainchart/$env/values.yaml $appname
 annotationFile=./$appname-annotations.yaml
@@ -65,10 +65,3 @@ sed 's/somethingorother/"*"/g' ultimate-apps-helmchart/mbe/resume-image-updater.
 
 #create this first
 
- helm template apps-helm-chart \
--f apps-helm-chart/values.yaml \
--f apps-helm-chart/$env-values.yaml \
--f $appnameValuesFile \
--f apps-helm-chart/$appname/$env-$appname-values.yaml  \
--s templates/$appname/image-updater-regexp.txt \
-| sed '/^#/d' | sed '/---/d' >> apps-helm-chart/$appname/$env-$appname-values.yaml

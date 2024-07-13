@@ -7,4 +7,3 @@ metadata:
     argocd-image-updater.argoproj.io/app.allow-tags: regexp:^mybranch
     argocd-image-updater.argoproj.io/external.allow-tags: regexp:^mybranch
     argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^mybranch
-    notifications.argoproj.io/subscribe.on-deployed.github: dev-wtdemo-on-deployed

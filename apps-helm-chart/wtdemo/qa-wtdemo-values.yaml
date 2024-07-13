@@ -1,3 +1,9 @@
 environment: qa
 namespace: qa-wtdemo
 cluster: qa-vcluster
+metadata:
+  annotations:
+    argocd-image-updater.argoproj.io/micro-ui.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/app.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/external.allow-tags: regexp:^mybranch
+    argocd-image-updater.argoproj.io/es-sync.allow-tags: regexp:^mybranch
