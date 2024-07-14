@@ -1,6 +1,7 @@
 #!/bin/bash
 
 usage() {
+  echo
   echo "Usage: $0 <appname> <environment(s, comma separated list)> [<action (pauseIU|resumeIU)>]"
   echo "allowed_environments=(${allowed_environments[*]})"
   echo "examples:"
@@ -8,6 +9,7 @@ usage() {
   echo "  $0 anotherapp dev,qa resumeIU"
   echo "  $0 someotherapp perf,prod,uat pauseIU"
   echo "Avoid SPACES in all arguments"
+  echo " - needs kubectl, helm and yq to work"
   exit 1
 }
 # Function to check if an environment is allowed
@@ -25,8 +27,10 @@ function is_env_allowed {
 
 # Check if the appname, env, and action arguments are provided
 if [ -z "$1" ] || [ -z "$2" ]; then
+echo
+echo error: takes two arguments and optional third argument
+echo
   usage
-  exit 1
 fi
 
 # Assign the arguments to variables
@@ -34,12 +38,22 @@ appname="$1"
 env_list="$2"
 action=$3
 
-IFS=',' read -r -a env_array <<< "$env_list"
+if [[ ! "$appname" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$ ]]; then
+  echo "Invalid appname: $appname , must start with lowercase alphabet or number, 
+     should contain only 
+      lowercase alphabet, NO UPPERCASE,
+      numbers 
+      hyphens allowed in the middle, NOT IN THE BEGINNING OR END"
+  exit 1
+fi
 
-if ! command -v yq &> /dev/null; then
-    echo "Error: yq (YAML processor) is required but not installed."
-    echo "Please install yq before running this script."
-    exit 1
+appname_length=${#appname}
+echo the $appname is $appname_length characters log
+
+# Check if the length is greater than 48 characters
+if [ "$appname_length" -gt 48 ]; then
+  echo "Error: appname is longer than 48 characters."
+  exit 1
 fi
 
 # Define the allowed list of environments
@@ -47,13 +61,41 @@ allowed_environments=("dev" "qa" "prod" "perf" "uat")
 # Allowed actions
 allowed_actions=("pauseIU" "resumeIU")
 
+IFS=',' read -r -a env_array <<< "$env_list"
+for env in "${env_array[@]}"; do
+  # Check if the environment is allowed
+  if ! is_env_allowed "$env"; then
+    echo "Error: Environment '$env' is not allowed."
+    echo 'allowed_environments=("dev" "qa" "prod" "perf" "uat")'
+    exit 1
+  fi
+  echo
+done
+
+if ! command -v yq &> /dev/null; then
+    echo "Error: yq (YAML processor) is required but not installed."
+    echo "Please install yq before running this script."
+    exit 1
+fi
+
+if ! command -v kubectl &> /dev/null; then
+    echo "Error: yq (YAML processor) is required but not installed."
+    echo "Please install kubectl before running this script."
+    exit 1
+fi
+
+if ! command -v kubectl &> /dev/null; then
+    echo "Error: yq (YAML processor) is required but not installed."
+    echo "Please install kubectl before running this script."
+    exit 1
+fi
 
 # If the action argument is provided, check if it is valid
 if [ -n "$action" ]; then
   #action=$3
   if [[ ! " ${allowed_actions[@]} " =~ " ${action} " ]]; then
     echo "Invalid action: $action"
-    usage
+    echo WARNING: skipping to default action, allowed actions are pauseIU and resumeIU
   fi
 else
   action="default_action" # Set your default action here if needed
@@ -164,9 +206,11 @@ echo action_cmd is $action_cmd you see
     -f apps-helm-chart/"$appname"/"$action_cmd" \
     --set appname="$appname" \
     --show-only  templates/app.yaml > $appFile
-
+echo
   echo "App YAML created at $appFile, see yaml below "
   cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
+echo
+echo
 done
 
 echo Checking if the app is ready to be added to git
