@@ -27,7 +27,7 @@ spec:
   {{- if .Values.spec.syncPolicy.automated }}
     automated:
       {{- range $key, $value := .Values.spec.syncPolicy.automated }}
-      {{ $key }}: {{ $value | quote }}
+      {{ $key }}: {{ $value }}
       {{- end }}
   {{- end }}
     syncOptions:
