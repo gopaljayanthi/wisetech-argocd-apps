@@ -1,3 +1,8 @@
 environment: perf
 namespace: perf
 cluster: in-cluster
+spec:
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

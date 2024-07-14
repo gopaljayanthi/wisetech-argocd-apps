@@ -23,12 +23,16 @@ spec:
     helm:
       valueFiles:
       - values.yaml
-      #- {{ .Values.environment }}-values.yaml
-      #- {{ .Values.appname }}/{{ .Values.appname }}-values.yaml
-      #- {{ .Values.appname }}/{{ .Values.environment }}-{{ .Values.appname }}-values.yaml
-  syncPolicy:
+  syncPolicy: 
+  {{- if .Values.spec.syncPolicy.automated }}
     automated:
-      prune: true
-      selfHeal: true
-    syncOptions: 
-    - CreateNamespace=true
+      {{- range $key, $value := .Values.spec.syncPolicy.automated }}
+      {{ $key }}: {{ $value | quote }}
+      {{- end }}
+  {{- end }}
+    syncOptions:
+      {{- range .Values.spec.syncPolicy.syncOptions }}
+      - {{ . }}
+      {{- end }}
+
+

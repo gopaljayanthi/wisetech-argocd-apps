@@ -2,3 +2,8 @@ environment: dev
 #comment the below lines later
 namespace: dev
 cluster: in-cluster
+spec:
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

@@ -12,3 +12,7 @@ metadata:
 gitrepo: https://github.com/gopaljayanthi/wisetech-argocd-apps
 namespace: argocd
 cluster: in-cluster
+spec:
+  syncPolicy:
+    syncOptions:
+    - CreateNamespace=true
