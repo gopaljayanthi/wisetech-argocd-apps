@@ -1,8 +1,8 @@
 #!/bin/bash
-
+################################################ functions #######################
 usage() {
   echo
-  echo "Usage: $0 <appname> <environment(s, comma separated list)> [<action (pauseIU|resumeIU)>]"
+  echo "Usage: $0 <appname> <environment(s, comma separated list)> [<action (pauseIU|resumeIU|createIU)>]"
   echo "allowed_environments=(${allowed_environments[*]})"
   echo "examples:"
   echo "  $0 myapp dev"
@@ -22,6 +22,37 @@ function is_env_allowed {
     done
     return 1  # Environment is not allowed
 }
+# Function to check if folder exists in the repo at the specified branch and path
+function folder_exists_in_repo {
+    local repoURL="$1"
+    local branch="$2"
+    local path="$3"
+
+    # Clone the repository to a temporary directory
+    temp_dir=$(mktemp -d)
+    echo using tempdir $temp_dir
+    if [ "$branch" == "HEAD" ]; then
+        git clone "$repoURL" "$temp_dir" >/dev/null 2>&1
+    else
+        git clone --branch "$branch" "$repoURL" "$temp_dir" >/dev/null 2>&1
+    fi
+
+    # Navigate to the directory
+    cd "$temp_dir" || return 1
+
+    # Check if the path exists in the repo
+    if ls "$path" >/dev/null; then
+        echo "Folder '$path' exists in branch '$branch' of the repository."
+##COMMENT BELOW LINE TO DEBUG
+        rm -rf "$temp_dir"
+        return 0
+    else
+        echo "Folder '$path' does not exist in branch '$branch' of the repository."
+##COMMENT BELOW LINE TO DEBUG
+        rm -rf "$temp_dir"
+        return 1
+    fi
+}
 
 ############################################# main #####################
 
@@ -38,7 +69,7 @@ appname="$1"
 env_list="$2"
 action=$3
 
-    ######################### Doing CHECKS ######################################
+#########################           Doing CHECKS                 ######################################
 
 if [[ ! "$appname" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$ ]]; then
   echo "Invalid appname: $appname , must start with lowercase alphabet or number, 
@@ -61,7 +92,7 @@ fi
 # Define the allowed list of environments
 allowed_environments=("dev" "qa" "prod" "perf" "uat")
 # Allowed actions
-allowed_actions=("pauseIU" "resumeIU")
+allowed_actions=("pauseIU" "resumeIU" "createIU")
 # Split the comma-separated list into an array
 IFS=',' read -r -a env_array <<< "$env_list"
 for env in "${env_array[@]}"; do
@@ -75,19 +106,19 @@ for env in "${env_array[@]}"; do
 done
 
 if ! command -v yq &> /dev/null; then
-    echo "Error: yq (YAML processor) is required but not installed."
+    echo "Error: yq is required but not installed."
     echo "Please install yq before running this script."
     exit 1
 fi
 
 if ! command -v kubectl &> /dev/null; then
-    echo "Error: yq (YAML processor) is required but not installed."
+    echo "Error: kubectl is required but not installed."
     echo "Please install kubectl before running this script."
     exit 1
 fi
 
-if ! command -v kubectl &> /dev/null; then
-    echo "Error: yq (YAML processor) is required but not installed."
+if ! command -v helm &> /dev/null; then
+    echo "Error: helm is required but not installed."
     echo "Please install kubectl before running this script."
     exit 1
 fi
@@ -104,63 +135,71 @@ else
 fi
 ####################################################################### FINISHED CHECKING ##############
 echo preparing ...........................................................
-echo making folder with name $appname
+   currentWorkingFolder=$(PWD)
    chartFolder=apps-helm-chart
    templatesFolder=$chartFolder/templates/"$appname"
    valuesFolder=$chartFolder/"$appname"
    aofaFolder=appofapps/"$appname"
    appValuesFile=$valuesFolder/$appname-values.yaml
 
+echo making folder with name $templatesFolder $aofaFolder
    mkdir -p $templatesFolder
    mkdir -p $aofaFolder
 ######################################## for first time apps ##############################################
  if [ ! -d $valuesFolder ]; then
     echo "The folder $valuesFolder does not exist."
-    #echo "Please run:"
     echo "creating $valuesFolder "
     mkdir -p $valuesFolder
     echo "The file $appValuesFile does not exist."
-    echo creating file $templatesFolder/mbe/dev-mbe-app.yaml
-    #echo "Please create this file:"
+    echo creating file $appValuesFile
     sed  "s/APPNAME/$appname/g" $chartFolder/example/values.yaml > $appValuesFile
     echo ------getting annotations-----------
-
+        for env in "${allowed_environments[@]}"; do
+          echo creating the $env specific values yaml for app $appname
+          envAppValuesFile=$valuesFolder/$env-$appname-values.yaml
+          sed  "s/APPNAME/$appname/g" $chartFolder/example/$env-values.yaml > $envAppValuesFile
+       done
+  else
+    echo "The folder $valuesFolder already exists. skipping copying from example folder $chartFolder/example"
+  fi
+######################################## end of first time apps ##############################################
+########################################for annotations########################################
+if [ "$action" == "createIU" ]; then
+    echo "adding image updater annotations"
 ../wisetech-k8s-repo/create-image-updater-annotation.sh ../wisetech-k8s-repo/$appname-mainchart/dev/values.yaml $appname
 annotationFile=./$appname-annotations.yaml
-FILE_PATH="$annotationFile"
 sleep 3
 # Check if the file does not exist
-if [ ! -f "$FILE_PATH" ]; then
-    echo "File '$FILE_PATH' not found."
+if [ ! -f "$annotationFile" ]; then
+    echo "error: File '$annotationFile' not found. check the script ../wisetech-k8s-repo/create-image-updater-annotation.sh or file ../wisetech-k8s-repo/$appname-mainchart/dev/values.yaml "
     exit 1
 fi
 # Continue with the script if the file exists
-echo "File '$FILE_PATH' exists."
+echo "File $annotationFile exists."
 
-appnameValuesFile=$appValuesFile
 iuRegexpFile=$templatesFolder/image-updater-regexp.txt
 
-cat $annotationFile | grep ^metadata: > $iuRegexpFile
-cat $annotationFile | grep annotations: >> $iuRegexpFile
-cat $annotationFile | grep regexp >> $iuRegexpFile
+grep ^metadata: $annotationFile > $iuRegexpFile
+grep annotations: $annotationFile >> $iuRegexpFile
+grep regexp $annotationFile >> $iuRegexpFile
 
-cat $annotationFile | grep ^metadata: >> $appnameValuesFile
-cat $annotationFile | grep annotations: >> $appnameValuesFile
-cat $annotationFile | grep image-list >> $appnameValuesFile
-cat $annotationFile | grep image-name >> $appnameValuesFile
-cat $annotationFile | grep update-strategy >> $appnameValuesFile
-cat $annotationFile | grep image-tag >> $appnameValuesFile
-cat $annotationFile | grep ignore-tags >> $appnameValuesFile
+grep ^metadata: $annotationFile >> $appValuesFile
+grep annotations: $annotationFile >> $appValuesFile
+grep image-list $annotationFile >> $appValuesFile
+grep image-name $annotationFile >> $appValuesFile
+grep update-strategy $annotationFile >> $appValuesFile
+grep image-tag $annotationFile >> $appValuesFile
+grep ignore-tags $annotationFile >> $appValuesFile
 
-cat $annotationFile | grep ^metadata: > $valuesFolder/resume-image-updater.yaml
-cat $annotationFile | grep annotations: >> $valuesFolder/resume-image-updater.yaml
-cat $annotationFile | grep ignore-tags >> $valuesFolder/resume-image-updater.yaml
-sed 's/somethingorother/"*"/g' ultimate-apps-helmchart/mbe/resume-image-updater.yaml > $valuesFolder/pause-image-updater.yaml
+grep ^metadata: $annotationFile > $valuesFolder/resume-image-updater.yaml
+grep annotations: $annotationFile >> $valuesFolder/resume-image-updater.yaml
+grep ignore-tags $annotationFile >> $valuesFolder/resume-image-updater.yaml
+
+sed 's/somethingorother/"*"/g' $valuesFolder/resume-image-updater.yaml > $valuesFolder/pause-image-updater.yaml
 
     for env in "${allowed_environments[@]}"; do
      echo creating the $env specific values yaml for app $appname
      envAppValuesFile=$valuesFolder/$env-$appname-values.yaml
-     sed  "s/APPNAME/$appname/g" $chartFolder/example/$env-values.yaml > $envAppValuesFile
      helm template $chartFolder \
      -f $chartFolder/values.yaml \
      -f $chartFolder/$env-values.yaml \
@@ -169,20 +208,16 @@ sed 's/somethingorother/"*"/g' ultimate-apps-helmchart/mbe/resume-image-updater.
      -s templates/$appname/image-updater-regexp.txt \
      | sed '/^#/d' | sed '/---/d' >> $envAppValuesFile
     done
-  else
-    echo "The folder $valuesFolder already exists. skipping annotaion for image updater"
-  fi
-
-
-######################################## end of first time apps ##############################################
-
+fi
+########################## end of checks if action is pauseIU or resumeIU for adding ImageUodater annotations ##################################################
+echo
 echo Loop over each environment value
 for env in "${env_array[@]}"; do
-envAppValuesFile=$valuesFolder/$env-$appname-values.yaml
+  envAppValuesFile=$valuesFolder/$env-$appname-values.yaml
   echo "Environment '$env'"
   appFile=$aofaFolder/"$env"-"$appname"-app.yaml
 
-# Determine the appropriate file based on the action
+# Determine the appropriate file based on the action for enabling/disabling image updater
 if [ "$action" == "pauseIU" ]; then
   action_cmd="pause-image-updater.yaml"
 else
@@ -192,9 +227,9 @@ else
   action_cmd=""$env"-"$appname"-values.yaml"
 fi
 fi
-
-echo action_cmd is $action_cmd you see
-
+echo
+echo generating app yaml from helm tamplates and values
+echo
   # Generate YAML using Helm template
   helm template $chartFolder \
     -f $chartFolder/values.yaml \
@@ -210,33 +245,57 @@ if [ $? -ne 0 ]; then
     echo "Check the values files in $valuesFolder for issues"
     exit 1
 fi
-
   if [ ! -f "$appFile" ]; then
     echo "The file $appFile does not exist."
-    check helm template command for issues or missing/misconfigured values files below
+    echo check helm template command for issues or missing/misconfigured values files below
     echo "
       $chartFolder/values.yaml 
       $chartFolder/"$env"-values.yaml 
       $valuesFolder/"$appname"-values.yaml 
       $valuesFolder/"$env"-"$appname"-values.yaml
       $valuesFolder/"$action_cmd" "
-
     exit 1
   else
     echo "The file $appValuesFile exists."
   fi
-
 echo
   echo "App YAML created at $appFile, see yaml below "
   cat $appFile
 echo
 
-echo Checking if the app has the source repo and path valid
-./check-app-repo-path-branch.sh $appFile || exit 1
-echo SUCCESS: the repo and path are both accessible
+################################################################## pre-deployment checks ########################
+echo Checking if the app has valid source repo branch and path 
+#./check-app-repo-path-branch.sh $appFile
+# Read YAML file and extract repoURL, branch, and path
+repoURL=$(yq e '.spec.source.repoURL' "$appFile")
+targetRevision=$(yq e '.spec.source.targetRevision' "$appFile")
+path=$(yq e '.spec.source.path' "$appFile")
 
+echo "Testing $repoURL $targetRevision $path"
+
+# Determine the branch to use (handling "HEAD" case)
+if [ "$targetRevision" == "HEAD" ]; then
+    branch="master"  # Default to master branch (or specify another default branch)
+    #branch="main"  # Default to master branch (or specify another default branch)
+else
+    branch="$targetRevision"
+fi
+
+if folder_exists_in_repo "$repoURL" "$branch" "$path"; then
+    echo "Folder exists!"
+        echo "you can create this application now,
+ by git add/commit/push"
+else
+    echo "Folder does not exist."
+    echo "The script to check if paths exist in the source repo failed. one of these is wrong "$repoURL" "$branch" "$path""
+    echo "Check the files $appValuesFile $envAppValuesFile for issues"
+    echo do not create this application yet
+    exit 1
+fi
+echo SUCCESS: the repo and path are both accessible
 echo checking dry-run of kubectl apply
-kubectl apply -f $appFile --dry-run=client
+cd $currentWorkingFolder
+kubectl apply -f ./"$appFile" --dry-run=client
 
 # Check if the previous command failed
 if [ $? -ne 0 ]; then
@@ -244,11 +303,7 @@ if [ $? -ne 0 ]; then
     echo "Check the file $appFile for issues"
     exit 1
 fi
-
 echo run: kubectl apply -f $appFile
 echo
 done
 ############################################################### end of loop ##################
-
-  
-   
