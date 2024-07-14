@@ -45,12 +45,9 @@ spec:
     helm:
       valueFiles:
       - values.yaml
-      #- qa-values.yaml
-      #- wtdemo/wtdemo-values.yaml
-      #- wtdemo/qa-wtdemo-values.yaml
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
-    syncOptions: 
-    - CreateNamespace=true
+    syncOptions:
+      - CreateNamespace=true

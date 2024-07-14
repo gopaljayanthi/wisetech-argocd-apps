@@ -3,7 +3,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: dev-wtdemo
+  name: prod-wtdemo
   namespace: argocd
   annotations:
     argocd-image-updater.argoproj.io/app.allow-tags: "regexp:^mybranch"
@@ -35,19 +35,16 @@ metadata:
      org: opsmx
 spec:
   destination:
-    namespace: dev-wtdemo
-    name: dev-vcluster
-  project: dev-project
+    namespace: prod-wtdemo
+    name: prod-vcluster
+  project: prod-project
   source:
-    path: wtdemo-mainchart/dev
+    path: wtdemo-mainchart/prod
     repoURL: https://github.com/gopaljayanthi/wisetech-k8s-repo
     targetRevision: HEAD
     helm:
       valueFiles:
       - values.yaml
   syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
     syncOptions:
       - CreateNamespace=true
