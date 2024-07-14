@@ -23,7 +23,7 @@ function is_env_allowed {
     return 1  # Environment is not allowed
 }
 
-############################################# main#####################
+############################################# main #####################
 
 # Check if the appname, env, and action arguments are provided
 if [ -z "$1" ] || [ -z "$2" ]; then
@@ -38,6 +38,8 @@ appname="$1"
 env_list="$2"
 action=$3
 
+    ######################### Doing CHECKS ######################################
+
 if [[ ! "$appname" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*$ ]]; then
   echo "Invalid appname: $appname , must start with lowercase alphabet or number, 
      should contain only 
@@ -48,7 +50,7 @@ if [[ ! "$appname" =~ ^[a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-
 fi
 
 appname_length=${#appname}
-echo the $appname is $appname_length characters log
+echo the $appname is $appname_length characters long
 
 # Check if the length is greater than 48 characters
 if [ "$appname_length" -gt 48 ]; then
@@ -60,7 +62,7 @@ fi
 allowed_environments=("dev" "qa" "prod" "perf" "uat")
 # Allowed actions
 allowed_actions=("pauseIU" "resumeIU")
-
+# Split the comma-separated list into an array
 IFS=',' read -r -a env_array <<< "$env_list"
 for env in "${env_array[@]}"; do
   # Check if the environment is allowed
@@ -100,23 +102,27 @@ if [ -n "$action" ]; then
 else
   action="default_action" # Set your default action here if needed
 fi
-
+####################################################################### FINISHED CHECKING ##############
 echo preparing ...........................................................
-IFS=',' read -r -a env_array <<< "$env_list"
 echo making folder with name $appname
-   mkdir -p apps-helm-chart/templates/"$appname"
-   mkdir -p appofapps/"$appname"
+   chartFolder=apps-helm-chart
+   templatesFolder=$chartFolder/templates/"$appname"
+   valuesFolder=$chartFolder/"$appname"
+   aofaFolder=appofapps/"$appname"
+   appValuesFile=$valuesFolder/$appname-values.yaml
+
+   mkdir -p $templatesFolder
+   mkdir -p $aofaFolder
 ######################################## for first time apps ##############################################
- if [ ! -d "apps-helm-chart/$appname" ]; then
-    echo "The folder apps-helm-chart/$appname does not exist."
+ if [ ! -d $valuesFolder ]; then
+    echo "The folder $valuesFolder does not exist."
     #echo "Please run:"
-    echo "creating apps-helm-chart/$appname"
-    #echo "Please make sure that this folder contains apps-helm-chart/$appname/$appname-values.yaml and apps-helm-chart/$appname/$env-$appname-values.yaml"
-    mkdir -p apps-helm-chart/$appname
-    echo "The file apps-helm-chart/$appname/$appname-values.yaml does not exist."
-    echo creating file apps-helm-chart/templates/mbe/dev-mbe-app.yaml
+    echo "creating $valuesFolder "
+    mkdir -p $valuesFolder
+    echo "The file $appValuesFile does not exist."
+    echo creating file $templatesFolder/mbe/dev-mbe-app.yaml
     #echo "Please create this file:"
-    sed  "s/APPNAME/$appname/g" apps-helm-chart/example/values.yaml > apps-helm-chart/$appname/$appname-values.yaml
+    sed  "s/APPNAME/$appname/g" $chartFolder/example/values.yaml > $appValuesFile
     echo ------getting annotations-----------
 
 ../wisetech-k8s-repo/create-image-updater-annotation.sh ../wisetech-k8s-repo/$appname-mainchart/dev/values.yaml $appname
@@ -131,8 +137,8 @@ fi
 # Continue with the script if the file exists
 echo "File '$FILE_PATH' exists."
 
-appnameValuesFile=apps-helm-chart/$appname/$appname-values.yaml
-iuRegexpFile=apps-helm-chart/templates/$appname/image-updater-regexp.txt
+appnameValuesFile=$appValuesFile
+iuRegexpFile=$templatesFolder/image-updater-regexp.txt
 
 cat $annotationFile | grep ^metadata: > $iuRegexpFile
 cat $annotationFile | grep annotations: >> $iuRegexpFile
@@ -146,43 +152,35 @@ cat $annotationFile | grep update-strategy >> $appnameValuesFile
 cat $annotationFile | grep image-tag >> $appnameValuesFile
 cat $annotationFile | grep ignore-tags >> $appnameValuesFile
 
-cat $annotationFile | grep ^metadata: > apps-helm-chart/$appname/resume-image-updater.yaml
-cat $annotationFile | grep annotations: >> apps-helm-chart/$appname/resume-image-updater.yaml
-cat $annotationFile | grep ignore-tags >> apps-helm-chart/$appname/resume-image-updater.yaml
-sed 's/somethingorother/"*"/g' ultimate-apps-helmchart/mbe/resume-image-updater.yaml > apps-helm-chart/$appname/pause-image-updater.yaml
+cat $annotationFile | grep ^metadata: > $valuesFolder/resume-image-updater.yaml
+cat $annotationFile | grep annotations: >> $valuesFolder/resume-image-updater.yaml
+cat $annotationFile | grep ignore-tags >> $valuesFolder/resume-image-updater.yaml
+sed 's/somethingorother/"*"/g' ultimate-apps-helmchart/mbe/resume-image-updater.yaml > $valuesFolder/pause-image-updater.yaml
 
-    #./create-annotations.sh $appname dev
     for env in "${allowed_environments[@]}"; do
      echo creating the $env specific values yaml for app $appname
-     sed  "s/APPNAME/$appname/g" apps-helm-chart/example/$env-values.yaml > apps-helm-chart/$appname/$env-$appname-values.yaml
-     helm template apps-helm-chart \
-     -f apps-helm-chart/values.yaml \
-     -f apps-helm-chart/$env-values.yaml \
-     -f $appnameValuesFile \
-     -f apps-helm-chart/$appname/$env-$appname-values.yaml  \
+     envAppValuesFile=$valuesFolder/$env-$appname-values.yaml
+     sed  "s/APPNAME/$appname/g" $chartFolder/example/$env-values.yaml > $envAppValuesFile
+     helm template $chartFolder \
+     -f $chartFolder/values.yaml \
+     -f $chartFolder/$env-values.yaml \
+     -f $appValuesFile \
+     -f $envAppValuesFile  \
      -s templates/$appname/image-updater-regexp.txt \
-     | sed '/^#/d' | sed '/---/d' >> apps-helm-chart/$appname/$env-$appname-values.yaml
+     | sed '/^#/d' | sed '/---/d' >> $envAppValuesFile
     done
   else
-    echo "The folder apps-helm-chart/$appname already exists. skipping annotaion for image updater"
+    echo "The folder $valuesFolder already exists. skipping annotaion for image updater"
   fi
 
 
-#exit 0
+######################################## end of first time apps ##############################################
+
 echo Loop over each environment value
-
-# Split the comma-separated list into an array
-
 for env in "${env_array[@]}"; do
-  # Check if the environment is allowed
-  if ! is_env_allowed "$env"; then
-    echo "Error: Environment '$env' is not allowed."
-    echo 'allowed_environments=("dev" "qa" "prod" "perf" "uat")'
-    continue  # Skip processing this environment
-  fi
-  echo
+envAppValuesFile=$valuesFolder/$env-$appname-values.yaml
   echo "Environment '$env'"
-  appFile=appofapps/"$appname"/"$env"-"$appname"-app.yaml
+  appFile=$aofaFolder/"$env"-"$appname"-app.yaml
 
 # Determine the appropriate file based on the action
 if [ "$action" == "pauseIU" ]; then
@@ -198,23 +196,44 @@ fi
 echo action_cmd is $action_cmd you see
 
   # Generate YAML using Helm template
-  helm template apps-helm-chart \
-    -f apps-helm-chart/values.yaml \
-    -f apps-helm-chart/"$env"-values.yaml \
-    -f apps-helm-chart/"$appname"/"$appname"-values.yaml \
-    -f apps-helm-chart/"$appname"/"$env"-"$appname"-values.yaml \
-    -f apps-helm-chart/"$appname"/"$action_cmd" \
+  helm template $chartFolder \
+    -f $chartFolder/values.yaml \
+    -f $chartFolder/"$env"-values.yaml \
+    -f $appValuesFile \
+    -f $envAppValuesFile \
+    -f $valuesFolder/"$action_cmd" \
     --set appname="$appname" \
     --show-only  templates/app.yaml > $appFile
+
+if [ $? -ne 0 ]; then
+    echo "The command helm template -f command failed."
+    echo "Check the values files in $valuesFolder for issues"
+    exit 1
+fi
+
+  if [ ! -f "$appFile" ]; then
+    echo "The file $appFile does not exist."
+    check helm template command for issues or missing/misconfigured values files below
+    echo "
+      $chartFolder/values.yaml 
+      $chartFolder/"$env"-values.yaml 
+      $valuesFolder/"$appname"-values.yaml 
+      $valuesFolder/"$env"-"$appname"-values.yaml
+      $valuesFolder/"$action_cmd" "
+
+    exit 1
+  else
+    echo "The file $appValuesFile exists."
+  fi
+
 echo
   echo "App YAML created at $appFile, see yaml below "
-  cat appofapps/"$appname"/"$env"-"$appname"-app.yaml
+  cat $appFile
 echo
-echo
-done
 
-echo Checking if the app is ready to be added to git
+echo Checking if the app has the source repo and path valid
 ./check-app-repo-path-branch.sh $appFile || exit 1
+echo SUCCESS: the repo and path are both accessible
 
 echo checking dry-run of kubectl apply
 kubectl apply -f $appFile --dry-run=client
@@ -223,10 +242,13 @@ kubectl apply -f $appFile --dry-run=client
 if [ $? -ne 0 ]; then
     echo "The command kubectl apply -f command failed."
     echo "Check the file $appFile for issues"
-
     exit 1
 fi
 
 echo run: kubectl apply -f $appFile
+echo
+done
+############################################################### end of loop ##################
+
   
    
