@@ -1,27 +1,26 @@
----
-# Source: argocd-projects/templates/argocd-project.tmpl
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
+  annotations: {}
   labels:
     app.kubernetes.io/instance: chartofapps
   name: prod-project
   namespace: argocd
 spec:
   clusterResourceWhitelist:
-  - group: '*'
-    kind: '*'
+    - group: '*'
+      kind: '*'
   destinations:
-  - name: '*prod*'
-    namespace: '*prod*'
-    server: '*'
+    - name: prod-vcluster
+      namespace: prod*
+      server: https://prod-vcluster.jpmc.opsmx.net:443
   sourceRepos:
-  - '*'
-  syncWindows:
-  - applications:
     - '*'
-    duration: 1h
-    kind: allow
-    manualSync: true
-    schedule: '* 11 * * *'
-    timeZone: UTC
+  syncWindows:
+    - applications:
+        - '*'
+      duration: 1h
+      kind: allow
+      manualSync: true
+      schedule: '* 11 * * *'
+      timeZone: UTC

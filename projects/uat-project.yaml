@@ -1,27 +1,26 @@
----
-# Source: argocd-projects/templates/argocd-project.tmpl
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
+  annotations: {}
   labels:
     app.kubernetes.io/instance: chartofapps
   name: uat-project
   namespace: argocd
 spec:
   clusterResourceWhitelist:
-  - group: '*'
-    kind: '*'
+    - group: '*'
+      kind: '*'
   destinations:
-  - name: '*uat*'
-    namespace: '*uat*'
-    server: '*'
+    - name: uat-vcluster
+      namespace: uat*
+      server: https://uat-vcluster.jpmc.opsmx.net:443
   sourceRepos:
-  - '*'
-  syncWindows:
-  - applications:
     - '*'
-    duration: 1h
-    kind: allow
-    manualSync: true
-    schedule: '* 11 * * *'
-    timeZone: UTC
+  syncWindows:
+    - applications:
+        - '*'
+      duration: 1h
+      kind: allow
+      manualSync: true
+      schedule: '* 11 * * *'
+      timeZone: UTC
